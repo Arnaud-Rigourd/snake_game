@@ -3,8 +3,7 @@ import pygame.event
 from models.fruit import Fruit
 from models.snake_game import SnakeGame
 from models.snake import Snake
-from utils import black, green, red, white
-
+from utils import black, green, white
 
 
 INITIAL_HEAD_POSITION = [30, 10]
@@ -33,7 +32,9 @@ while True:
         snake.body.pop()
 
     # draw the fruit
-    pygame.draw.rect(game.window, white, pygame.Rect(fruit.position[0], fruit.position[1], 10, 10))
+    pygame.draw.rect(
+        game.window, white, pygame.Rect(fruit.position[0], fruit.position[1], 10, 10)
+    )
 
     # draw the snake body in the window
     for body in snake.body:

@@ -23,11 +23,11 @@ MOVE_MAP = {
 
 class Snake:
     def __init__(
-            self,
-            body: list[list[int]],
-            head_position: list[int],
-            direction: DirectionEnum | None = DirectionEnum.RIGHT,
-            speed: int | None = 15
+        self,
+        body: list[list[int]],
+        head_position: list[int],
+        direction: DirectionEnum | None = DirectionEnum.RIGHT,
+        speed: int | None = 15,
     ):
         self.body = body
         self.head_position = head_position

@@ -45,12 +45,15 @@ class SnakeGame:
             self.game_over()
 
         for body_position in snake.body[1:]:
-            if snake.head_position[0] == body_position[0] and snake.head_position[1] == body_position[1]:
+            if (
+                snake.head_position[0] == body_position[0]
+                and snake.head_position[1] == body_position[1]
+            ):
                 self.game_over()
 
     def show_score(self):
-        score_font = pygame.font.SysFont('times new roman', 15)
-        score_surface = score_font.render('Score : ' + str(self.score), True, red)
+        score_font = pygame.font.SysFont("times new roman", 15)
+        score_surface = score_font.render("Score : " + str(self.score), True, red)
         score_rect = score_surface.get_rect()
 
         self.window.blit(score_surface, score_rect)

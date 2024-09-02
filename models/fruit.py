@@ -14,4 +14,7 @@ class Fruit:
         return False
 
     def generate_fruit_position(self, game: SnakeGame):
-        self.position = [random.randrange(1, (game.window_x//10)) * 10, random.randrange(1, (game.window_y//10)) * 10]
+        self.position = [
+            random.randrange(1, (game.window_x // 10)) * 10,
+            random.randrange(1, (game.window_y // 10)) * 10,
+        ]
