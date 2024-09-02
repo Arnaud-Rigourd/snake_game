@@ -1,3 +1,4 @@
+import enum
 from enum import Enum
 
 import pygame
@@ -14,3 +15,10 @@ class AutoEnum(Enum):
     @staticmethod
     def _generate_next_value_(name, start, count, last_values):
         return name
+
+
+class DirectionEnum(enum.Enum):
+    UP = enum.auto()
+    DOWN = enum.auto()
+    RIGHT = enum.auto()
+    LEFT = enum.auto()
