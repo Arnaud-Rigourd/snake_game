@@ -34,12 +34,13 @@ class Individual:
         return cls(
             W1=np.random.randn(INPUT_SIZE, hidden_size),
             W2=np.random.randn(hidden_size, OUTPUT_SIZE),
-            brain=Brain.create_model(input_shape=INPUT_SHAPE),
+            brain=Brain.create_model(input_shape=INPUT_SHAPE, neuron_count=hidden_size),
         )
 
     @staticmethod
     def fitness(game: SnakeGame) -> float:
-        return float(round(game.score / game.life_time, 3))
+        # return float(round(game.score / game.life_time, 3))
+        return round(float(game.score), 3)
 
     def __repr__(self):
         return "Individual"

@@ -1,3 +1,4 @@
+import math
 from typing import TYPE_CHECKING, Self
 
 import numpy as np
@@ -7,6 +8,7 @@ from pygame.event import Event
 if TYPE_CHECKING:
     from models.game import SnakeGame
     from ML.models.individual import Individual
+    from models.fruit import Fruit
 from utils import DirectionEnum
 
 INITIAL_HEAD_POSITION = [30, 10]
@@ -17,9 +19,16 @@ SNAKE_BODY = [
     [10, 10],
 ]
 
-SPEED = 500
+SPEED = 10
 
-FORBIDDEN_MOVE_PENALTY = 0.1
+FRUIT_REWARD = 200
+COLLISION_AVOIDED_REWARD = 20
+FORBIDDEN_MOVE_PENALTY = -10
+FRUIT_DISTANCE_REWARD = 10
+FRUIT_DISTANCE_PENALTY = -5
+MOVE_CONSISTENCY_REWARD = 50
+EXPLORATION_REWARD = 2
+MOVE_REWARD = 5
 
 
 FORBIDDEN_MOVE_MAP = {
@@ -63,6 +72,16 @@ class Snake:
         )
 
     def move(self) -> None:
+        """
+        Update the position of the snake, and return relevant information to adjust the score:
+        - new move
+        - fruit eaten
+        - new direction consistency
+        - avoided collision
+        """
+        initial_distance = self.get_distance_from_fruit(self.game.fruit)
+        initial_head_position = self.head_position
+        initial_fruit_position = self.game.fruit.position
         match self.direction:
             case DirectionEnum.UP:
                 self.head_position[1] += MOVE_MAP[DirectionEnum.UP]
@@ -75,6 +94,55 @@ class Snake:
 
         self.body.insert(0, [*self.head_position])
 
+        if self.head_position == initial_fruit_position:
+            self.game.fruit.generate_fruit_position(self.game)
+        else:
+            self.body.pop()
+
+        self.adjust_score(
+            initial_distance, initial_head_position, initial_fruit_position
+        )
+
+    def adjust_score(
+        self,
+        initial_distance: float,
+        initial_position: list[int],
+        initial_fruit_position: list[int],
+    ) -> None:
+        self.game.score += MOVE_REWARD
+
+        new_distance = self.get_distance_from_fruit(self.game.fruit)
+        if new_distance < initial_distance:
+            self.game.score += FRUIT_DISTANCE_REWARD
+            if (
+                self.head_position[0] == self.game.fruit.position[0]
+                or self.head_position[1] == self.game.fruit.position[1]
+            ):
+                self.game.score += MOVE_CONSISTENCY_REWARD
+        elif new_distance > initial_distance:
+            self.game.score += FRUIT_DISTANCE_PENALTY
+
+        if self.head_position == initial_fruit_position:
+            self.game.score += FRUIT_REWARD
+            self.game.fruit_eaten += 1
+
+        if self.is_collision_avoided(initial_position):
+            self.game.score += COLLISION_AVOIDED_REWARD
+
+    def is_collision_avoided(self, initial_position: list[int]) -> bool:
+        # check body position
+        # check wall position or distance -> game.window_x and y
+        # if the distance is less than 1 block, then reward
+
+        return False
+
+    def get_distance_from_fruit(self, fruit: "Fruit") -> float:
+        """Get the Euclidean distance between the snake and the fruit"""
+        return math.sqrt(
+            (self.head_position[0] - fruit.position[0]) ** 2
+            + (self.head_position[1] - fruit.position[1]) ** 2
+        )
+
     def get_forecasted_next_move(self, individual: "Individual") -> np.int64:
         next_move = None
         for i in range(3):
@@ -86,7 +154,7 @@ class Snake:
             next_move = np.argmax(output) + 1
             if DirectionEnum(next_move) == FORBIDDEN_MOVE_MAP[self.direction]:
                 # try to give a legit move if next_move is forbidden (3 try before moving on)
-                self.game.score -= FORBIDDEN_MOVE_PENALTY
+                self.game.score += FORBIDDEN_MOVE_PENALTY
                 self.game.forbidden_move_count += 1
             else:
                 break

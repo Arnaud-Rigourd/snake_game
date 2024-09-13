@@ -1,4 +1,5 @@
 import enum
+import signal
 from enum import Enum
 
 import pygame
@@ -22,3 +23,27 @@ class DirectionEnum(enum.Enum):
     DOWN = enum.auto()
     RIGHT = enum.auto()
     LEFT = enum.auto()
+
+
+class TimeoutException(Exception):
+    pass
+
+
+def alarm_handler(signum, frame):
+    raise TimeoutException("The function reached the timeout: consider investigate")
+
+
+def timeout(seconds):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            signal.signal(signal.SIGALRM, alarm_handler)
+            signal.alarm(seconds)
+            try:
+                result = func(*args, **kwargs)
+            finally:
+                signal.alarm(0)
+            return result
+
+        return wrapper
+
+    return decorator
